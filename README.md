@@ -1,6 +1,6 @@
 Clone the project:
 
-git clone https://github.com/your-username/movies-api.git
+git clone https://github.com/sashaSobchuk/movies-api.git
 
 Install dependencies:
 
@@ -31,7 +31,13 @@ DELETE /api/movies/:movieId
 5. Import movies from a CSV file:
 POST /api/movies/import
 
+#run from  docker
 
+###pull 
+docker pull  sashasobchuk/movies:latest
+
+###run
+docker run --name movies -p 8000:8050 -e APP_PORT=8050 sashasobchuk/movies
 
 
 
