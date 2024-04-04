@@ -2,7 +2,11 @@ const { Sequelize, DataTypes } = require('sequelize');
 
  const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: 'database.sqlite'
+    storage: 'database.sqlite',
+     dialectOptions: {
+         charset: 'utf8',
+         collation: 'utf8mb4_unicode_ci'
+     },
 });
 
 const Movie = sequelize.define('Movie', {
@@ -14,7 +18,9 @@ const Movie = sequelize.define('Movie', {
     },
     title: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true,
+        collate: 'utf8mb4_unicode_ci',
     },
     releaseYear: {
         type: DataTypes.INTEGER,
@@ -22,7 +28,7 @@ const Movie = sequelize.define('Movie', {
     },
     format: {
         type: DataTypes.ENUM('VHS', 'DVD', 'Blu-ray'),
-        allowNull: false
+        allowNull: false,
     },
     actors: {
         type: DataTypes.STRING,
