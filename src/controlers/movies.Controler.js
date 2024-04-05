@@ -21,9 +21,9 @@ class MoviesController {
             } : {title: {[Sequelize.Op.like]: `%${movieName.toLowerCase()}%`}};
         }
         if (sortBy === 'title') {
-            query.order = [[Sequelize.col('title', { collate: 'utf8mb4_unicode_ci' }), 'ASC']];
+            query.order = [[Sequelize.col('title', {collate: 'utf8mb4_unicode_ci'}), 'ASC']];
         } else if (sortBy === '-title') {
-            query.order = [[Sequelize.col('title', { collate: 'utf8mb4_unicode_ci' }), 'DESC']];
+            query.order = [[Sequelize.col('title', {collate: 'utf8mb4_unicode_ci'}), 'DESC']];
         }
         return query
     }
@@ -66,21 +66,34 @@ class MoviesController {
 
             const promises = [];
             for (const movie of movies) {
-                const [title, releaseYear, format, actors] = movie.split('\r\n');
+                try {
+                    const [titleStr, releaseYearStr, formatStr, actorsStr] = movie.split('\r\n');
+                    const title = titleStr.split(': ')[1]
+                    const releaseYear = releaseYearStr.split(': ')[1]
+                    const format = formatStr.split(': ')[1]
+                    const actors = actorsStr.split(': ')[1].split(', ')
+                    const validationErrors = MoviesController.validateMovie({
+                        title,
+                        releaseYear,
+                        format,
+                        actors
+                    })
+                    if (validationErrors.length) {
+                        console.log(`Missing required fields in movie: ${title}`);
+                        continue
+                    }
 
-                const validationErrors = MoviesController.validateMovie({title, releaseYear, format, actors})
-                if (validationErrors.length) {
-                    console.log(`Missing required fields in movie: ${title}`);
-                    continue
+                    const transformedMovie = MoviesController.transformMoovie({title, releaseYear, format, actors})
+                    promises.push(Movie.create({
+                        title: transformedMovie.title,
+                        releaseYear: transformedMovie.releaseYear,
+                        format: transformedMovie.format,
+                        actors: transformedMovie.actors,
+                    }));
+
+                } catch (e) {
+                    console.log(e)
                 }
-
-                const transformedMovie = MoviesController.transformMoovie(req.body)
-                promises.push(Movie.create({
-                    title: transformedMovie.title,
-                    releaseYear: transformedMovie.releaseYear,
-                    format: transformedMovie.format,
-                    actors: transformedMovie.format,
-                }));
             }
 
             const results = await Promise.all(promises);
